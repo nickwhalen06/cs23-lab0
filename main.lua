@@ -91,8 +91,12 @@ function love.load()
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
-    player1 = Paddle(10, 30, 5, 20)
-    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+    -- player1 = Paddle(10, 30, 5, 20)
+    -- player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+
+    player1 = Paddle(60, 10, 40, 5)
+    player2 = Paddle(VIRTUAL_WIDTH - 60, VIRTUAL_HEIGHT - 10, 40, 5)
+    
 
     -- place a ball in the middle of the screen
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
@@ -150,8 +154,8 @@ function love.update(dt)
         -- slightly increasing it, then altering the dy based on the position
         -- at which it collided, then playing a sound effect
         if ball:collides(player1) then
-            ball.dx = -ball.dx * 1.03
-            ball.x = player1.x + 5
+            ball.dy = -ball.dy * 1.03
+            ball.y = player1.y + 5
 
             -- keep velocity going in the same direction, but randomize it
             if ball.dy < 0 then
@@ -163,8 +167,8 @@ function love.update(dt)
             sounds['paddle_hit']:play()
         end
         if ball:collides(player2) then
-            ball.dx = -ball.dx * 1.03
-            ball.x = player2.x - 4
+            ball.dy = -ball.dy * 1.03
+            ball.y = player2.y - 4
 
             -- keep velocity going in the same direction, but randomize it
             if ball.dy < 0 then
@@ -178,22 +182,22 @@ function love.update(dt)
 
         -- detect upper and lower screen boundary collision, playing a sound
         -- effect and reversing dy if true
-        if ball.y <= 0 then
-            ball.y = 0
-            ball.dy = -ball.dy
+        if ball.x <= 0 then
+            ball.x = 0
+            ball.dx = -ball.dx
             sounds['wall_hit']:play()
         end
 
         -- -4 to account for the ball's size
-        if ball.y >= VIRTUAL_HEIGHT - 4 then
-            ball.y = VIRTUAL_HEIGHT - 4
-            ball.dy = -ball.dy
+        if ball.x >= VIRTUAL_WIDTH - 4 then
+            ball.x = VIRTUAL_WIDTH - 4
+            ball.dx = -ball.dx
             sounds['wall_hit']:play()
         end
 
         -- if we reach the left or right edge of the screen, go back to serve
         -- and update the score and serving player
-        if ball.x < 0 then
+        if ball.y < 0 then 
             servingPlayer = 1
             player2Score = player2Score + 1
             sounds['score']:play()
@@ -210,7 +214,7 @@ function love.update(dt)
             end
         end
 
-        if ball.x > VIRTUAL_WIDTH then
+        if ball.y > VIRTUAL_HEIGHT then --  if ball.x > VIRTUAL_WIDTH then
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
@@ -230,20 +234,20 @@ function love.update(dt)
     --
     -- player 1
     if love.keyboard.isDown('w') then
-        player1.dy = -PADDLE_SPEED
+        player1.dx = -PADDLE_SPEED
     elseif love.keyboard.isDown('s') then
-        player1.dy = PADDLE_SPEED
+        player1.dx = PADDLE_SPEED
     else
-        player1.dy = 0
+        player1.dx = 0
     end
 
     -- player 2
     if love.keyboard.isDown('up') then
-        player2.dy = -PADDLE_SPEED
+        player2.dx = -PADDLE_SPEED
     elseif love.keyboard.isDown('down') then
-        player2.dy = PADDLE_SPEED
+        player2.dx = PADDLE_SPEED
     else
-        player2.dy = 0
+        player2.dx = 0
     end
 
     -- update our ball based on its DX and DY only if we're in play state;
@@ -309,14 +313,14 @@ function love.draw()
     if gameState == 'start' then
         -- UI messages
         love.graphics.setFont(smallFont)
-        love.graphics.printf('Welcome to Pong!', 0, 10, VIRTUAL_WIDTH, 'center')
-        love.graphics.printf('Press Enter to begin!', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Welcome to Pong!', 0, VIRTUAL_HEIGHT / 4, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Press Enter to begin!', 0, VIRTUAL_HEIGHT / 3, VIRTUAL_WIDTH, 'center')
     elseif gameState == 'serve' then
         -- UI messages
         love.graphics.setFont(smallFont)
         love.graphics.printf('Player ' .. tostring(servingPlayer) .. "'s serve!", 
             0, 10, VIRTUAL_WIDTH, 'center')
-        love.graphics.printf('Press Enter to serve!', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Press Enter to serve!', 0, VIRTUAL_HEIGHT / 4, VIRTUAL_WIDTH, 'center')
     elseif gameState == 'play' then
         -- no UI messages to display in play
     elseif gameState == 'done' then
@@ -336,7 +340,7 @@ function love.draw()
     ball:render()
 
     -- display FPS for debugging; simply comment out to remove
-    displayFPS()
+    -- displayFPS()
 
     -- end our drawing to push
     push:finish()
